@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -e html,js,css /home/matias/Plataforma5/Bootcamp/wikiStack/app.js"
+    "start": "nodemon -e html,js,css /Users/matias/Desktop/Bootcamp/wikiStack3/app.js"
   },
   "author": "",
   "license": "ISC",

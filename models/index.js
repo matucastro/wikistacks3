@@ -1,19 +1,21 @@
 var Sequelize = require('sequelize');
-var db = new Sequelize('postgres://localhost:5432/wikistack', {logging: false});
-
+var db = new Sequelize('postgres://localhost:5432/wikistack', { logging: false });
 
 var Page = db.define('page', {
     title: {
         type: Sequelize.STRING,
-        allowNull: false 
+        allowNull: false
     },
     urlTitle: {
         type: Sequelize.STRING,
-        allowNull: false 
+        allowNull: false,
+        get() {
+            return `/wiki/${this.getDataValue('urlTitle')}`;
+        }
     },
     content: {
         type: Sequelize.TEXT,
-        allowNull: false 
+        allowNull: false
     },
     status: {
         type: Sequelize.ENUM('open', 'closed')
@@ -22,24 +24,46 @@ var Page = db.define('page', {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
     }
-});
+},
+    {
+        hooks: {
+            beforeValidate: (page, options) => {
+                //console.log(`el urlTitle es ${page.urlTitle}`);
+                page.urlTitle = generateUrlTitle(page.title);
+            }
+        }
+    });
 
 var User = db.define('user', {
     name: {
         type: Sequelize.STRING,
-        allowNull: false 
+        allowNull: false
     },
     email: {
-    type: Sequelize.STRING,
-    validate: {
-      isEmail: true
-    },
-    allowNull: false  
-  }
+        type: Sequelize.STRING,
+        validate: {
+            isEmail: true
+        },
+        allowNull: false
+    }
 });
 
+
 module.exports = {
-  Page: Page,
-  User: User,
-  db: db
+    Page: Page,
+    User: User,
+    db: db
 };
+
+function generateUrlTitle(string) {
+    if (string) {
+        // Remueve todos los caracteres no-alfanuméricos 
+        // y hace a los espacios guiones bajos. 
+        return string.replace(/\s+/g, '_').replace(/\W/g, '');
+    } else {
+        // Generá de forma aleatoria un string de 5 caracteres
+        return Math.random().toString(36).substring(2, 7);
+    }
+}
+
+Page.belongsTo(User, { as: 'author' });
